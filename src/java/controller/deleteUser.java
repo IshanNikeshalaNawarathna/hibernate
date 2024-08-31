@@ -20,8 +20,8 @@ import org.hibernate.SessionFactory;
  *
  * @author Ishan
  */
-@WebServlet(name = "saveUser", urlPatterns = {"/saveUser"})
-public class saveUser extends HttpServlet {
+@WebServlet(name = "deleteUser", urlPatterns = {"/deleteUser"})
+public class deleteUser extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -29,15 +29,11 @@ public class saveUser extends HttpServlet {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
 
-        User user = new User();
-        user.setName("Ishan Nikeshala");
-        user.setMobile("0767235819");
-
-        session.save(user);
+        User user = (User) session.load(User.class, 1);
+        session.delete(user);
         session.beginTransaction().commit();
-        
+
         session.close();
 
     }
-
 }

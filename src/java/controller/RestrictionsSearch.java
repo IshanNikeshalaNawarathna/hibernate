@@ -6,6 +6,7 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,15 +14,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.HibernateUtil;
 import model.User;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
  * @author Ishan
  */
-@WebServlet(name = "saveUser", urlPatterns = {"/saveUser"})
-public class saveUser extends HttpServlet {
+@WebServlet(name = "RestrictionsSearch", urlPatterns = {"/RestrictionsSearch"})
+public class RestrictionsSearch extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -29,13 +32,17 @@ public class saveUser extends HttpServlet {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
 
-        User user = new User();
-        user.setName("Ishan Nikeshala");
-        user.setMobile("0767235819");
+        Criteria criteria = session.createCriteria(User.class);
 
-        session.save(user);
-        session.beginTransaction().commit();
-        
+        criteria.add(Restrictions.eq("name", "Ishan Nikeshala"));
+        criteria.add(Restrictions.eq("mobile", "0767235819"));
+
+        ArrayList<User> arrayList = (ArrayList<User>) criteria.list();
+
+        for (User user : arrayList) {
+            response.getWriter().write(user.getName());
+        }
+
         session.close();
 
     }
