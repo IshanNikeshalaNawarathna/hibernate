@@ -6,13 +6,17 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import model.Country;
 import model.HibernateUtil;
 import model.User;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -20,24 +24,25 @@ import org.hibernate.SessionFactory;
  *
  * @author Ishan
  */
-@WebServlet(name = "saveUser", urlPatterns = {"/saveUser"})
-public class saveUser extends HttpServlet {
+@WebServlet(name = "OneTomanySearch", urlPatterns = {"/OneTomanySearch"})
+public class OneTomanySearch extends HttpServlet {
 
-    @Override
+ @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
 
-        User user = new User();
-        user.setName("Ishan Nikeshala");
-        user.setMobile("0767235819");
+        Criteria criteria = session.createCriteria(Country.class);
 
-        session.save(user);
-        session.beginTransaction().commit();
-        
+        List<Country> list = (List<Country>) criteria.list();
+
+        for (Country country : list) {
+            System.out.println(country.getUserList());
+     }
+
         session.close();
 
     }
-
+  
 }
