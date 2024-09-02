@@ -24,10 +24,10 @@ public class Country implements Serializable {
 
     @Column(name = "country_name",length = 45,nullable = false)
     private String country_name;
-    
-    @OneToMany(mappedBy = "country",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    private List<User> userList;
-    
+//    
+//    @OneToMany(mappedBy = "country",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    private List<User> userList;
+//    
 
     public Country() {
     }
@@ -48,13 +48,13 @@ public class Country implements Serializable {
     public void setCountry_name(String country_name) {
         this.country_name = country_name;
     }
-
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
-    }
+//
+//    public List<User> getUserList() {
+//        return userList;
+//    }
+//
+//    public void setUserList(List<User> userList) {
+//        this.userList = userList;
+//    }
 
 }
