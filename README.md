@@ -490,9 +490,9 @@ public class JoinTableSearch extends HttpServlet {
 
         ArrayList<User> arrayList = (ArrayList<User>) criteria.list();
 
-        for (User user : arrayList) {
-//            response.getWriter().write(user.getName());
-//            response.getWriter().write(user.getCountry().getCountry_name());
+        for (User user : arrayList) {  
+//            response.getWriter().write(user.getName()); this line is comment. and use to line uncomment.
+//            response.getWriter().write(user.getCountry().getCountry_name()); this line is comment. and use to line uncomment.
             System.out.println(user.getName());
             System.out.println(user.getCountry().getCountry_name());
         }
@@ -568,7 +568,7 @@ public class Country implements Serializable {
 
 
  ```
-## How to JOIN TABLE SEARCH to data in Hibernate
+## How to JOIN TABLE SEARCH to data in Hibernate (one to many relationshipe)
  ```bash
 
 package controller;
@@ -588,29 +588,241 @@ import model.User;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 
 @WebServlet(name = "OneTomanySearch", urlPatterns = {"/OneTomanySearch"})
 public class OneTomanySearch extends HttpServlet {
 
- @Override
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        Session session = sessionFactory.openSession();
+        Session session = HibernateUtil.getSessionFactory().openSession();
 
         Criteria criteria = session.createCriteria(Country.class);
+        criteria.add(Restrictions.eq("country_name", "UK"));
 
-        List<Country> list = (List<Country>) criteria.list();
+        // Country country = (Country) criteria.list().get(0); this line is comment. and use to line uncomment.
+        Country country = (Country) criteria.uniqueResult();
 
-        for (Country country : list) {
-            System.out.println(country.getUserList());
-     }
+        // List<User> list = country.getUserList(); this line is comment. and use to line uncomment.
+        
+        Criteria criteria1 = session.createCriteria(User.class);
+        criteria1.add(Restrictions.eq("country", country));
+        
+        List<User> list = criteria1.list();
+        
+        for (User user : list) {
+            System.out.println(user.getName());
+        }
 
         session.close();
 
     }
-  
+
+}
+
+ ```
+## How to SEARCH lot of users between two country in data in Hibernate 
+ ```bash
+
+
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import model.Country;
+import model.HibernateUtil;
+import model.User;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+
+
+@WebServlet(name = "moreUserInTwoCountry", urlPatterns = {"/moreUserInTwoCountry"})
+public class moreUserInTwoCountry extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        Criteria criteria = session.createCriteria(Country.class);
+        criteria.add(
+                Restrictions.or(
+                        Restrictions.eq("country_name", "USA"),
+                        Restrictions.eq("country_name", "UK")
+                )
+        );
+
+        List<Country> countryList = criteria.list();
+
+        Criteria criteria1 = session.createCriteria(User.class);
+        criteria1.add(
+                Restrictions.in("country", countryList)
+        );
+        List<User> list = criteria1.list();
+        for (User user : list) {
+            System.out.println(user.getName());
+        }
+
+        session.close();
+
+    }
+
+}
+
+ ```
+## How to SEARCH distinct in data in Hibernate 
+ ```bash
+
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import model.Country;
+import model.HibernateUtil;
+import model.User;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+
+
+@WebServlet(name = "DistinctSearch", urlPatterns = {"/DistinctSearch"})
+public class DistinctSearch extends HttpServlet {
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        
+        Criteria criteria = session.createCriteria(User.class);
+        criteria.setProjection(
+                Projections.distinct(
+                        Projections.property("name")
+                )
+        );
+        
+        List<String> list = criteria.list();
+        
+        for (String string : list) {
+            System.out.println(string);
+        }
+        
+        session.close();
+        
+    }
+    
 }
 
 
  ```
+## How to user HSQL in data in Hibernate( Hibernate Query Language ) 
+ ```bash
+
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import model.HibernateUtil;
+import model.User;
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+
+@WebServlet(name = "HQLquery", urlPatterns = {"/HQLquery"})
+public class HQLquery extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+        //Query query = session.createQuery("FROM User"); this line is comment. and use to line uncomment.
+        //Query query = session.createQuery("FROM User WHERE name='ISHAN'"); this line is comment. and use to line uncomment.
+        //Query query = session.createQuery("FROM User ORDER BY name"); this line is comment. and use to line uncomment.
+        Query query = session.createQuery("SELECT DISTINCT(name) FROM User");
+        List<String> list = query.list();
+        
+        //List<User> list = query.list();
+        
+        for (String string : list) {
+            System.out.println(string);
+        }
+
+//        for (User user : list) { this line is comment. and use to line uncomment.
+//            System.out.println(user.getName()); this line is comment. and use to line uncomment.
+//        } this line is comment. and use to line uncomment.
+
+        session.close();
+
+    }
+
+}
+
+ ```
+## How to user SQL in data in Hibernate( Structured Query Language ) 
+ ```bash
+
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import model.HibernateUtil;
+import model.User;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+
+
+@WebServlet(name = "SQLquery", urlPatterns = {"/SQLquery"})
+public class SQLquery extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
+
+      //  SQLQuery query = session.createSQLQuery("SELECT * FROM `user` WHERE `name`='ISHAN'"); this line is comment. and use to line uncomment.
+        SQLQuery query = session.createSQLQuery("SELECT * FROM `user` ORDER BY `name` ASC");
+        query.addEntity(User.class);
+
+        List<User> list = query.list();
+
+        for (User user : list) {
+            System.out.println(user.getName());
+        }
+
+        session.close();
+
+    }
+}
+
+ ```
+
+
+
+
