@@ -6,7 +6,6 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,40 +17,35 @@ import model.HibernateUtil;
 import model.User;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Projections;
 
 /**
  *
  * @author Ishan
  */
-@WebServlet(name = "OneTomanySearch", urlPatterns = {"/OneTomanySearch"})
-public class OneTomanySearch extends HttpServlet {
-
+@WebServlet(name = "DistinctSearch", urlPatterns = {"/DistinctSearch"})
+public class DistinctSearch extends HttpServlet {
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        
         Session session = HibernateUtil.getSessionFactory().openSession();
-
-        Criteria criteria = session.createCriteria(Country.class);
-        criteria.add(Restrictions.eq("country_name", "UK"));
-
-        // Country country = (Country) criteria.list().get(0);
-        Country country = (Country) criteria.uniqueResult();
-
-        // List<User> list = country.getUserList();
         
-        Criteria criteria1 = session.createCriteria(User.class);
-        criteria1.add(Restrictions.eq("country", country));
+        Criteria criteria = session.createCriteria(User.class);
+        criteria.setProjection(
+                Projections.distinct(
+                        Projections.property("name")
+                )
+        );
         
-        List<User> list = criteria1.list();
+        List<String> list = criteria.list();
         
-        for (User user : list) {
-            System.out.println(user.getName());
+        for (String string : list) {
+            System.out.println(string);
         }
-
+        
         session.close();
-
+        
     }
-
+    
 }
